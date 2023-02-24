@@ -39,7 +39,7 @@ import time
 
 if __name__ == '__main__':
     opt = parse_opts()
-    n_folds = 1
+    n_folds = 3
     test_accuracies = []
     
     if opt.device != 'cpu':
@@ -62,12 +62,19 @@ if __name__ == '__main__':
     # opt.result_path = os.path.join(opt.result_path, str(time_stamp))
     # if not os.path.exists(opt.result_path):
     #     os.makedirs(opt.result_path)
+    seeds = [42, 2023, int(time_stamp)]
 
     for fold in range(n_folds):
         #if opt.dataset == 'RAVDESS':
         #    opt.annotation_path = '/lustre/scratch/chumache/ravdess-develop/annotations_croppad_fold'+str(fold+1)+'.txt'
+        
+        # 尝试用上面的种子数组控制使用的种子，只有在seed是1的时候才采用以上的这些种子
+        if(opt.manual_seed == 1) :
+            # 以下取余操作是为了防止越界
+            opt.manual_seed = seeds[fold % (len(seeds))]
+        
         # 在每个fold创建一个以当前时间戳命名的文件夹，实现训练数据按照时间戳放置
-        opt.result_path = os.path.join(opt.result_path, str(time.time()))
+        opt.result_path = os.path.join(opt.result_path, str(time.time()), 'lr_', opt.learning_rate, 'seed_', opt.manual_seed)
         if not os.path.exists(opt.result_path):
             os.makedirs(opt.result_path)
 
