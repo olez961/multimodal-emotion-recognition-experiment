@@ -135,20 +135,34 @@ if __name__ == '__main__':
                 os.path.join(opt.result_path, 'train_batch'+str(fold)+'.log'),
                 ['epoch', 'batch', 'iter', 'loss', 'prec1', 'prec5', 'lr'])
             
-            # 这里使用的是随机梯度下降(SGD)优化器，它的参数如下：
-            # parameters：模型的参数
-            # lr：学习率，控制每次参数更新的幅度大小
-            # momentum：动量，控制参数更新的方向和速度，可以加速模型的训练
-            # dampening：阻尼系数，控制动量的阻尼效果，使得动量不会引起震荡
-            # weight_decay：权重衰减，也叫L2正则化，防止模型过拟合
-            # nesterov：是否使用Nesterov动量优化算法。
-            optimizer = optim.SGD(
-                parameters,
-                lr=opt.learning_rate,
-                momentum=opt.momentum,
-                dampening=opt.dampening,
-                weight_decay=opt.weight_decay,
-                nesterov=False)
+            # 将默认的optimizer设置为SGD
+            if opt.optimizer != 'SGD':
+                # 若optimizer不为Adam，将其设置为AdamW
+                if opt.optimizer != 'Adam':
+                    optimizer = optim.AdamW(
+                    parameters,
+                    lr=opt.learning_rate,
+                    weight_decay=opt.weight_decay)
+                else :
+                    optimizer = optim.Adam(
+                    parameters,
+                    lr=opt.learning_rate,
+                    weight_decay=opt.weight_decay)
+            else :
+                # 这里使用的是随机梯度下降(SGD)优化器，它的参数如下：
+                # parameters：模型的参数
+                # lr：学习率，控制每次参数更新的幅度大小
+                # momentum：动量，控制参数更新的方向和速度，可以加速模型的训练
+                # dampening：阻尼系数，控制动量的阻尼效果，使得动量不会引起震荡
+                # weight_decay：权重衰减，也叫L2正则化，防止模型过拟合
+                # nesterov：是否使用Nesterov动量优化算法。
+                optimizer = optim.SGD(
+                    parameters,
+                    lr=opt.learning_rate,
+                    momentum=opt.momentum,
+                    dampening=opt.dampening,
+                    weight_decay=opt.weight_decay,
+                    nesterov=False)
             # lr_scheduler.ReduceLROnPlateau是一个基于验证损失下降情况动态调整学习率的学习率调度器。
             # 其作用是监控验证集上的损失，如果损失在指定的轮数（即patience）内没有下降，
             # 则将当前学习率降低一个因子（即factor），以控制训练过程中学习率的变化。

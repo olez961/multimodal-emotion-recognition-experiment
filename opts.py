@@ -51,6 +51,8 @@ def parse_opts():
     parser.add_argument('--manual_seed', default=1, type=int, help='Manually set random seed')
     parser.add_argument('--fusion', default='ia', type=str, help='fusion type: lt | it | ia')
     parser.add_argument('--mask', type=str, help='dropout type : softhard | noise | nodropout', default='softhard')
+    parser.add_argument('--optimizer', type=str, help='optimizer : SGD | Adam | AdamW', default='SGD')
+    
     args = parser.parse_args()
 
     return args
