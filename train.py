@@ -26,6 +26,7 @@ def train_epoch_multimodal(epoch, data_loader, model, criterion, optimizer, opt,
         targets = targets.to(opt.device)
             
         if opt.mask is not None:
+            # 关闭 PyTorch 张量的梯度计算，以便在进行推理或评估时提高效率并减少内存消耗
             with torch.no_grad():
                 
                 if opt.mask == 'noise':

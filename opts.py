@@ -29,12 +29,14 @@ def parse_opts():
     parser.add_argument('--dampening', default=0.9, type=float, help='dampening of SGD')
     parser.add_argument('--weight_decay', default=1e-3, type=float, help='Weight Decay')
     parser.add_argument('--lr_patience', default=10, type=int, help='Patience of LR scheduler. See documentation of ReduceLROnPlateau.')
-    parser.add_argument('--batch_size', default=8, type=int, help='Batch Size')
+    # 以下选项原代码默认是8
+    parser.add_argument('--batch_size', default=16, type=int, help='Batch Size')
     parser.add_argument('--n_epochs', default=100, type=int, help='Number of total epochs to run')
     
     parser.add_argument('--begin_epoch', default=1, type=int, help='Training begins at this epoch. Previous trained model indicated by resume_path is loaded.')
     parser.add_argument('--resume_path', default='', type=str, help='Save data (.pth) of previous training')
-    parser.add_argument('--pretrain_path', default='EfficientFace_Trained_on_AffectNet7.pth.tar', type=str, help='Pretrained model (.pth), efficientface')
+    # 以下选项原文中的默认路径是EfficientFace_Trained_on_AffectNet7.pth.tar
+    parser.add_argument('--pretrain_path', default='/home/ubuntu/work_space/EfficientFace-master/checkpoint/Pretrained_EfficientFace.tar', type=str, help='Pretrained model (.pth), efficientface')
     parser.add_argument('--no_train', action='store_true', help='If true, training is not performed.')
     parser.set_defaults(no_train=False)
     parser.add_argument('--no_val', action='store_true', help='If true, validation is not performed.')

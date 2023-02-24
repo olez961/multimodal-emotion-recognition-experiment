@@ -1,0 +1,11 @@
+datasets
+output
+results
+
+-*
+ravdess_preprocessing/*.txt
+*[ _]copy.py
+*.pth
+*.log
+test*/
+__*__/
