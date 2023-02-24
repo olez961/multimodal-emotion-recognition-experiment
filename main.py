@@ -59,16 +59,27 @@ if __name__ == '__main__':
 
     # 根据时间点将数据存储到同一个文件夹
     time_stamp = time.time()
-    opt.result_path = os.path.join(opt.result_path, str(time_stamp))
-    if not os.path.exists(opt.result_path):
-        os.makedirs(opt.result_path)
+    # opt.result_path = os.path.join(opt.result_path, str(time_stamp))
+    # if not os.path.exists(opt.result_path):
+    #     os.makedirs(opt.result_path)
 
     for fold in range(n_folds):
         #if opt.dataset == 'RAVDESS':
         #    opt.annotation_path = '/lustre/scratch/chumache/ravdess-develop/annotations_croppad_fold'+str(fold+1)+'.txt'
-        
+        # 在每个fold创建一个以当前时间戳命名的文件夹，实现训练数据按照时间戳放置
+        opt.result_path = os.path.join(opt.result_path, str(time.time()))
+        if not os.path.exists(opt.result_path):
+            os.makedirs(opt.result_path)
+
+        # 每个fold都准备一组参数用于opt初始化，同时将该fold的训练数据全部存储到某个文件夹中。
+        # 这样我就能通过添加一些变量来控制每个fold的一些参数，
+        # 避免了通过sh脚本来写训练脚本
+        # 但是这样也会存在问题，就是添加变量这一过程实际上是比较复杂的，比不上sh脚本
+
+        # 从这里开始可以进行自己的自定义训练设置
+
         print(opt)
-        # 将opts参数记录在json文件中，带上时间戳和fold字符串避免命名冲突
+        # 将opts参数记录在json文件中，带上fold字符串避免命名冲突（原始版本中还带了时间戳）
         with open(os.path.join(opt.result_path, 'opts'+str(fold)+'.json'), 'w') as opt_file:
             json.dump(vars(opt), opt_file, separators=(',\n', ':'))
         
