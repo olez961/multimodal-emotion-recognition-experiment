@@ -74,7 +74,8 @@ if __name__ == '__main__':
             opt.manual_seed = seeds[fold % (len(seeds))]
         
         # 在每个fold创建一个以当前时间戳命名的文件夹，实现训练数据按照时间戳放置
-        opt.result_path = os.path.join(opt.result_path, str(time.time()), 'lr_', opt.learning_rate, 'seed_', opt.manual_seed)
+        opt.result_path = os.path.join(opt.result_path, 
+                                       str(time.time())+'lr_'+str(opt.learning_rate)+'seed_'+str(opt.manual_seed))
         if not os.path.exists(opt.result_path):
             os.makedirs(opt.result_path)
 
