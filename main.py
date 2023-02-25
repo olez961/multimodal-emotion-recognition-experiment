@@ -63,18 +63,21 @@ if __name__ == '__main__':
     # if not os.path.exists(opt.result_path):
     #     os.makedirs(opt.result_path)
     seeds = [42, 2023, int(time_stamp)]
+    pre_result_path = opt.result_path
 
     for fold in range(n_folds):
         #if opt.dataset == 'RAVDESS':
         #    opt.annotation_path = '/lustre/scratch/chumache/ravdess-develop/annotations_croppad_fold'+str(fold+1)+'.txt'
         
         # 尝试用上面的种子数组控制使用的种子，只有在seed是1的时候才采用以上的这些种子
-        if(opt.manual_seed == 1) :
+        # 一开始只有or左边的判断句，后面发现有问题，于是加上了右边的表达式
+        # 这样可以保证种子能遍历到所有情况而不是固定在42（第一个元素）
+        if(opt.manual_seed == 1 or (fold > 0 and opt.manual_seed == seeds[(fold - 1) % (len(seeds))])) :
             # 以下取余操作是为了防止越界
             opt.manual_seed = seeds[fold % (len(seeds))]
         
         # 在每个fold创建一个以当前时间戳命名的文件夹，实现训练数据按照时间戳放置
-        opt.result_path = os.path.join(opt.result_path, 
+        opt.result_path = os.path.join(pre_result_path, 
                                        str(time.time())+'lr_'+str(opt.learning_rate)+'seed_'+str(opt.manual_seed))
         if not os.path.exists(opt.result_path):
             os.makedirs(opt.result_path)
@@ -89,7 +92,7 @@ if __name__ == '__main__':
         print(opt)
         # 将opts参数记录在json文件中，带上fold字符串避免命名冲突（原始版本中还带了时间戳）
         with open(os.path.join(opt.result_path, 'opts'+str(fold)+'.json'), 'w') as opt_file:
-            json.dump(vars(opt), opt_file, separators=(',\n', ':'))
+            json.dump(vars(opt), opt_file) # , separators=(',\n', ':')
         
         # torch.manual_seed可以设置所有CPU和GPU上的随机数种子，
         # 保证每次生成的随机数序列相同，从而使得模型训练结果可重复。
