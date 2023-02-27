@@ -8,7 +8,7 @@ import argparse
 
 def parse_opts():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--annotation_path', default='ravdess_preprocessing/annotations.txt', type=str, help='Annotation file path')
+    parser.add_argument('--annotation_path', default='/home/ubuntu/work_space/multimodal-emotion-recognition-experiment/ravdess_preprocessing/annotations.txt', type=str, help='Annotation file path')
     parser.add_argument('--result_path', default='results', type=str, help='Result directory path')
     parser.add_argument('--store_name', default='model', type=str, help='Name to store checkpoints')
     parser.add_argument('--dataset', default='RAVDESS', type=str, help='Used dataset. Currently supporting Ravdess')
@@ -23,7 +23,7 @@ def parse_opts():
     parser.add_argument('--sample_size', default=224, type=int, help='Video dimensions: ravdess = 224 ')
     parser.add_argument('--sample_duration', default=15, type=int, help='Temporal duration of inputs, ravdess = 15')
     
-    parser.add_argument('--learning_rate', default=0.04, type=float, help='Initial learning rate (divided by 10 while training by lr scheduler)')
+    parser.add_argument('--learning_rate', default=0.001, type=float, help='Initial learning rate (divided by 10 while training by lr scheduler)') # 0.04
     parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
     parser.add_argument('--lr_steps', default=[40, 55, 65, 70, 200, 250], type=float, nargs="+", metavar='LRSteps', help='epochs to decay learning rate by 10')
     parser.add_argument('--dampening', default=0.9, type=float, help='dampening of SGD')

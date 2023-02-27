@@ -39,7 +39,7 @@ import time
 
 if __name__ == '__main__':
     opt = parse_opts()
-    n_folds = 3
+    n_folds = 1
     test_accuracies = []
     
     if opt.device != 'cpu':
@@ -77,8 +77,12 @@ if __name__ == '__main__':
             opt.manual_seed = seeds[fold % (len(seeds))]
         
         # 在每个fold创建一个以当前时间戳命名的文件夹，实现训练数据按照时间戳放置
-        opt.result_path = os.path.join(pre_result_path, 
-                                       str(time.time())+'lr_'+str(opt.learning_rate)+'seed_'+str(opt.manual_seed))
+        opt.result_path = os.path.join( pre_result_path, 
+                                        str(time.time())+ \
+                                        'lr_'+str(opt.learning_rate)+ \
+                                        'seed_'+str(opt.manual_seed)+ \
+                                        'optimizer_'+str(opt.optimizer)+ \
+                                        'weight_decay_'+str(opt.weight_decay))
         if not os.path.exists(opt.result_path):
             os.makedirs(opt.result_path)
 
@@ -92,7 +96,7 @@ if __name__ == '__main__':
         print(opt)
         # 将opts参数记录在json文件中，带上fold字符串避免命名冲突（原始版本中还带了时间戳）
         with open(os.path.join(opt.result_path, 'opts'+str(fold)+'.json'), 'w') as opt_file:
-            json.dump(vars(opt), opt_file) # , separators=(',\n', ':')
+            json.dump(vars(opt), opt_file, separators=(',\n', ':')) # , separators=(',\n', ':')
         
         # torch.manual_seed可以设置所有CPU和GPU上的随机数种子，
         # 保证每次生成的随机数序列相同，从而使得模型训练结果可重复。

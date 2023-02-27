@@ -213,6 +213,13 @@ class MultiModalCNN(nn.Module):
         x_visual = self.visual_model.forward_features(x_visual)
         x_visual = self.visual_model.forward_stage1(x_visual)
 
+        # permute() 是 PyTorch 中的一个函数，它用于对张量的维度重新排序。
+        # 具体来说，它可以重新排列张量的轴，
+        # 从而改变张量的形状，但不改变张量中元素的相对位置。
+
+        # permute() 接受一个整数序列作为输入，该序列表示要创建的新维度排列顺序。
+        # 例如，permute(0, 2, 1) 表示将第 1 个维度放在第 0 个位置，
+        # 第 3 个维度放在第 2 个位置，第 2 个维度放在第 1 个位置。
         proj_x_a = x_audio.permute(0,2,1)
         proj_x_v = x_visual.permute(0,2,1)
 
