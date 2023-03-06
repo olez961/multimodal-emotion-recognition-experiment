@@ -148,6 +148,18 @@ if __name__ == '__main__':
                 shuffle=True,
                 num_workers=opt.n_threads,
                 pin_memory=True)
+            
+            # (audio_inputs, visual_inputs, targets)
+            # 尝试搞明白train_loader输入的数据形状是什么样的
+            # 以下迭代器结构是在train.py中的第22行看到的
+            # for batch_idx, (audio_data, visual_data, target) in enumerate(train_loader):
+            #     if batch_idx == 0:
+            #         print("Batch", batch_idx, 
+            #               "input audio data size:", audio_data.size(), 
+            #               "input visual data size:", visual_data.size(), 
+            #               "target size:", target.size())
+            #     else:
+            #         break
 
             # 这段代码使用了一个自定义的Logger类创建了两个logger，train_logger和train_batch_logger，
             # 它们将用于记录训练过程中的loss、accuracy、learning rate等信息。

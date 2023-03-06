@@ -30,7 +30,7 @@ def parse_opts():
     parser.add_argument('--weight_decay', default=1e-3, type=float, help='Weight Decay')
     parser.add_argument('--lr_patience', default=10, type=int, help='Patience of LR scheduler. See documentation of ReduceLROnPlateau.')
     # 以下选项原代码默认是8
-    parser.add_argument('--batch_size', default=20, type=int, help='Batch Size')
+    parser.add_argument('--batch_size', default=6, type=int, help='Batch Size')
     parser.add_argument('--n_epochs', default=100, type=int, help='Number of total epochs to run')
     
     parser.add_argument('--begin_epoch', default=1, type=int, help='Training begins at this epoch. Previous trained model indicated by resume_path is loaded.')
@@ -49,7 +49,7 @@ def parse_opts():
     parser.add_argument('--video_norm_value', default=255, type=int, help='If 1, range of inputs is [0-255]. If 255, range of inputs is [0-1].')
  
     parser.add_argument('--manual_seed', default=1, type=int, help='Manually set random seed')
-    parser.add_argument('--fusion', default='ia', type=str, help='fusion type: lt | it | ia')
+    parser.add_argument('--fusion', default='iaLSTM', type=str, help='fusion type: lt | it | ia | iaLSTM')
     parser.add_argument('--mask', type=str, help='dropout type : softhard | noise | nodropout', default='softhard')
     parser.add_argument('--optimizer', type=str, help='optimizer : SGD | Adam | AdamW', default='SGD')
     

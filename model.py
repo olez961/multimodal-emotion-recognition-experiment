@@ -21,7 +21,7 @@ def generate_model(opt):
         # 它通过在批次维度上分割输入，将给定的模型复制到指定的设备上。
         # nn.DataParallel需要指定模型需要在哪些设备上运行。
         # device_ids参数是一个整数列表，表示模型需要在哪些GPU上运行。
-        # 如果不设置为None，PyTorch会自动使用所有可用的GPU。
+        # 如果设置为None，PyTorch会自动使用所有可用的GPU。
         model = nn.DataParallel(model, device_ids=None)
 
         # 这行代码用于计算 PyTorch 模型中可训练参数的数量。

@@ -8,6 +8,7 @@ import torch.nn as nn
 from models.modulator import Modulator
 from models.efficientface import LocalFeatureExtractor, InvertedResidual
 from models.transformer_timm import AttentionBlock, Attention
+import torchvision.models as models
 
 def conv1d_block(in_channels, out_channels, kernel_size=3, stride=1, padding='same'):
     return nn.Sequential(nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size,stride=stride, padding=padding),nn.BatchNorm1d(out_channels),
@@ -54,19 +55,48 @@ class EfficientFaceTemporal(nn.Module):
         self.conv1d_2 = conv1d_block(64, 128)
         self.conv1d_3 = conv1d_block(128, 128)
 
+        # self.resnet50 = models.resnet50(pretrained=False)
+        self.resnet50 = models.resnet50(pretrained=True)
+        self.adaptive_avgpool = nn.AdaptiveAvgPool2d((7, 7))
+        # self.resnet_conv1 =    resnet50.conv1
+        # self.resnet_bn1 =      resnet50.bn1
+        # self.resnet_relu =     resnet50.relu
+        # self.resnet_maxpool =  resnet50.maxpool
+        # self.resnet_layer1 =   resnet50.layer1
+        # self.resnet_layer2 =   resnet50.layer2
+        # self.resnet_layer3 =   resnet50.layer3
+        # self.resnet_layer4 =   resnet50.layer4
+        # self.resnet_avgpool =  resnet50.avgpool
+
         self.classifier_1 = nn.Sequential(
                 nn.Linear(128, num_classes),
             )
         self.im_per_sample = im_per_sample
         
-    def forward_features(self, x):
-        x = self.conv1(x)
-        x = self.maxpool(x)
-        x = self.modulator(self.stage2(x)) + self.local(x)
-        x = self.stage3(x)
-        x = self.stage4(x)
-        x = self.conv5(x)
-        x = x.mean([2, 3]) #global average pooling
+    def forward_features(self, x):  # torch.Size([1200, 3, 224, 224])
+        x = self.conv1(x)   # torch.Size([1200, 29, 112, 112])
+        x = self.maxpool(x) # torch.Size([1200, 29, 56, 56])
+        x = self.modulator(self.stage2(x)) + self.local(x)  # torch.Size([1200, 116, 28, 28])
+        x = self.stage3(x)  # torch.Size([1200, 232, 14, 14])
+        x = self.stage4(x)  # torch.Size([1200, 464, 7, 7])
+        x = self.conv5(x)   # torch.Size([1200, 1024, 7, 7])
+        # 对每个通道上的所有元素求平均值。这样就得到了一个一维向量作为输出
+        x = x.mean([2, 3]) #global average pooling， torch.Size([1200, 1024])
+        return x
+        
+    def forward_features_resnet(self, x):  # torch.Size([1200, 3, 224, 224])
+        x = self.resnet50.conv1(x)
+        x = self.resnet50.bn1(x)
+        x = self.resnet50.relu(x)
+        x = self.resnet50.maxpool(x)
+        x = self.resnet50.layer1(x)
+        x = self.resnet50.layer2(x)
+        x = self.resnet50.layer3(x)
+
+        x = self.adaptive_avgpool(x)
+        # x = torch.randn(1200, 1024, 7, 7)
+        # 对每个通道上的所有元素求平均值。这样就得到了一个一维向量作为输出
+        x = x.mean([2, 3]) #global average pooling， torch.Size([1200, 1024])
         return x
 
     def forward_stage1(self, x):
@@ -161,7 +191,7 @@ class AudioCNNPool(nn.Module):
 class MultiModalCNN(nn.Module):
     def __init__(self, num_classes=8, fusion='ia', seq_length=15, pretr_ef='None', num_heads=1):
         super(MultiModalCNN, self).__init__()
-        assert fusion in ['ia', 'it', 'lt'], print('Unsupported fusion method: {}'.format(fusion))
+        assert fusion in ['ia', 'it', 'lt', 'iaLSTM'], print('Unsupported fusion method: {}'.format(fusion))
 
         self.audio_model = AudioCNNPool(num_classes=num_classes)
         self.visual_model = EfficientFaceTemporal([4, 8, 4], [29, 116, 232, 464, 1024], num_classes, seq_length)
@@ -182,12 +212,18 @@ class MultiModalCNN(nn.Module):
                 self.av1 = AttentionBlock(in_dim_k=input_dim_video, in_dim_q=input_dim_audio, out_dim=input_dim_audio, num_heads=num_heads)
                 self.va1 = AttentionBlock(in_dim_k=input_dim_audio, in_dim_q=input_dim_video, out_dim=input_dim_video, num_heads=num_heads)   
         
-        elif fusion in ['ia']:
-            input_dim_video = input_dim_video // 2
-            
-            self.av1 = Attention(in_dim_k=input_dim_video, in_dim_q=input_dim_audio, out_dim=input_dim_audio, num_heads=num_heads)
-            self.va1 = Attention(in_dim_k=input_dim_audio, in_dim_q=input_dim_video, out_dim=input_dim_video, num_heads=num_heads)
-
+        elif fusion in ['ia', 'iaLSTM']:
+            if fusion == 'ia':
+                input_dim_video = input_dim_video // 2
+                
+                self.av1 = Attention(in_dim_k=input_dim_video, in_dim_q=input_dim_audio, out_dim=input_dim_audio, num_heads=num_heads)
+                self.va1 = Attention(in_dim_k=input_dim_audio, in_dim_q=input_dim_video, out_dim=input_dim_video, num_heads=num_heads)
+            elif fusion == 'iaLSTM':
+                input_dim_video = input_dim_video // 2
+                
+                self.av1 = Attention(in_dim_k=input_dim_video, in_dim_q=input_dim_audio, out_dim=input_dim_audio, num_heads=num_heads)
+                self.va1 = Attention(in_dim_k=input_dim_audio, in_dim_q=input_dim_video, out_dim=input_dim_video, num_heads=num_heads)
+                
             
         self.classifier_1 = nn.Sequential(
                     nn.Linear(e_dim*2, num_classes),
@@ -205,12 +241,51 @@ class MultiModalCNN(nn.Module):
        
         elif self.fusion == 'it':
             return self.forward_feature_3(x_audio, x_visual)
+       
+        elif self.fusion == 'iaLSTM':
+            return self.forward_feature_4(x_audio, x_visual)
 
- 
+    def forward_feature_4(self, x_audio, x_visual):
+        x_audio = self.audio_model.forward_stage1(x_audio)
+        x_visual = self.visual_model.forward_features_resnet(x_visual)
+        x_visual = self.visual_model.forward_stage1(x_visual)
+
+        proj_x_a = x_audio.permute(0,2,1)
+        proj_x_v = x_visual.permute(0,2,1)
+
+        _, h_av = self.av1(proj_x_v, proj_x_a)
+        _, h_va = self.va1(proj_x_a, proj_x_v)
+        
+        if h_av.size(1) > 1: #if more than 1 head, take average
+            h_av = torch.mean(h_av, axis=1).unsqueeze(1)
+       
+        h_av = h_av.sum([-2])
+
+        if h_va.size(1) > 1: #if more than 1 head, take average
+            h_va = torch.mean(h_va, axis=1).unsqueeze(1)
+
+        h_va = h_va.sum([-2])
+
+        x_audio = h_va*x_audio
+        x_visual = h_av*x_visual
+        
+        x_audio = self.audio_model.forward_stage2(x_audio)       
+        x_visual = self.visual_model.forward_stage2(x_visual)
+
+        audio_pooled = x_audio.mean([-1]) #mean accross temporal dimension
+        video_pooled = x_visual.mean([-1])
+        
+        x = torch.cat((audio_pooled, video_pooled), dim=-1)
+        
+        x1 = self.classifier_1(x)
+        return x1
         
     def forward_feature_3(self, x_audio, x_visual):
         x_audio = self.audio_model.forward_stage1(x_audio)
+        # 用jupyter试了一下，经过下面的操作x_visual从[1200, 3, 224, 224]
+        # 变成了[1200, 1024]
         x_visual = self.visual_model.forward_features(x_visual)
+        # 经过这一步后其变成了[80, 64, 15]
         x_visual = self.visual_model.forward_stage1(x_visual)
 
         # permute() 是 PyTorch 中的一个函数，它用于对张量的维度重新排序。
@@ -232,13 +307,16 @@ class MultiModalCNN(nn.Module):
         x_audio = h_av+x_audio
         x_visual = h_va + x_visual
 
-        x_audio = self.audio_model.forward_stage2(x_audio)       
+        x_audio = self.audio_model.forward_stage2(x_audio)
+        # 经过下一步后x_visual变成了[80, 128, 15]
         x_visual = self.visual_model.forward_stage2(x_visual)
         
         audio_pooled = x_audio.mean([-1]) #mean accross temporal dimension
+        # 经过下一步后x_visual变成了[80, 128]
         video_pooled = x_visual.mean([-1])
 
         x = torch.cat((audio_pooled, video_pooled), dim=-1)
+        # x1.shape输出结果为torch.Size([80, 8])，对上了
         x1 = self.classifier_1(x)
         return x1
     
