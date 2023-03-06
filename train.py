@@ -5,7 +5,7 @@ import torch
 from torch.autograd import Variable
 import time
 from utils import AverageMeter, calculate_accuracy
-from models.convlstm import ConvLSTM
+# from models.convlstm import ConvLSTM
 
 def train_epoch_multimodal(epoch, data_loader, model, criterion, optimizer, opt,
                 epoch_logger, batch_logger):
