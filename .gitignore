@@ -1,6 +1,7 @@
 datasets
 output
 *results
+test*
 
 *.db
 *lstm.py
