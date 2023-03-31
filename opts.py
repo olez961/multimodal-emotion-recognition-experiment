@@ -31,7 +31,8 @@ def parse_opts():
     parser.add_argument('--lr_patience', default=10, type=int, help='Patience of LR scheduler. See documentation of ReduceLROnPlateau.')
     # 以下选项原代码默认是8
     parser.add_argument('--batch_size', default=6, type=int, help='Batch Size')
-    parser.add_argument('--n_epochs', default=100, type=int, help='Number of total epochs to run')
+    # 以下选项原代码默认是100
+    parser.add_argument('--n_epochs', default=30, type=int, help='Number of total epochs to run')
     
     parser.add_argument('--begin_epoch', default=1, type=int, help='Training begins at this epoch. Previous trained model indicated by resume_path is loaded.')
     parser.add_argument('--resume_path', default='', type=str, help='Save data (.pth) of previous training')
