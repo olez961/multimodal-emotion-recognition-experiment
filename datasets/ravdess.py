@@ -52,7 +52,9 @@ class RAVDESS(data.Dataset):
                  annotation_path,
                  subset,
                  spatial_transform=None,
-                 get_loader=get_default_video_loader, data_type = 'audiovisual', audio_transform=None):
+                 get_loader=get_default_video_loader, 
+                 data_type = 'audiovisual', 
+                 audio_transform=None):
         self.data = make_dataset(subset, annotation_path)
         self.spatial_transform = spatial_transform
         self.audio_transform=audio_transform
