@@ -26,6 +26,9 @@ def load_audio(audiofile, sr):
     y = audios[0]
     return y, sr
 
+# get_mfccs 函数使用 librosa 库计算音频的 MFCC 特征。
+# 其中，n_mfcc 参数被设置为 10，这意味着函数将返回 10 个 MFCC 通道。
+# 因此，得到的通道数是 10。
 def get_mfccs(y, sr):
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=10)
     return mfcc

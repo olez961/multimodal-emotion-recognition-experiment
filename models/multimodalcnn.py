@@ -148,6 +148,11 @@ def conv1d_block_audio(in_channels, out_channels, kernel_size=3, stride=1, paddi
     return nn.Sequential(nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size,stride=stride, padding='valid'),nn.BatchNorm1d(out_channels),
                                    nn.ReLU(inplace=True), nn.MaxPool1d(2,1))
 
+# 这个类是一个音频分类的卷积神经网络模型。
+# 它接受形状为(batch_size, input_channels, sequence_length)的输入张量，
+# 其中batch_size是批量大小，input_channels是输入的通道数，在模型中被设置为10，
+# sequence_length是输入的时间序列长度。在这个类中，
+# 输入张量首先通过两个卷积层进行特征提取，然后通过平均池化层进行降维，最后通过一个全连接层进行分类。
 class AudioCNNPool(nn.Module):
 
     def __init__(self, num_classes=8):
@@ -224,7 +229,7 @@ class MultiModalCNN(nn.Module):
                 self.av1 = Attention(in_dim_k=input_dim_video, in_dim_q=input_dim_audio, out_dim=input_dim_audio, num_heads=num_heads)
                 self.va1 = Attention(in_dim_k=input_dim_audio, in_dim_q=input_dim_video, out_dim=input_dim_video, num_heads=num_heads)
                 
-            
+        # 相当于将e_dim*2维度的输入数据映射到num_classes输出维度的线性空间了
         self.classifier_1 = nn.Sequential(
                     nn.Linear(e_dim*2, num_classes),
                 )
@@ -274,7 +279,14 @@ class MultiModalCNN(nn.Module):
 
         audio_pooled = x_audio.mean([-1]) #mean accross temporal dimension
         video_pooled = x_visual.mean([-1])
-        
+
+        # 将两个张量audio_pooled和video_pooled在最后一个维度上进行拼接，得到一个新的张量x。
+        # 具体来说，audio_pooled和video_pooled的维度应该是相同的，除了最后一个维度之外。
+        # 例如，如果audio_pooled的维度是(batch_size, audio_dim)，
+        # video_pooled的维度是(batch_size, video_dim)，
+        # 那么拼接后的张量x的维度应该是(batch_size, audio_dim+video_dim)。
+        # 因此，这一行代码的作用是将两个不同的特征向量拼接在一起，
+        # 得到一个更加丰富的特征向量，用于后续的模型训练和预测。
         x = torch.cat((audio_pooled, video_pooled), dim=-1)
         
         x1 = self.classifier_1(x)
