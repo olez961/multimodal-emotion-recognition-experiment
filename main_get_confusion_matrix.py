@@ -63,6 +63,7 @@ if __name__ == '__main__':
     
     # 加载模型
     pretrain_state_path = '/home/ubuntu/work_space/multimodal-emotion-recognition-experiment/best_results/1678717134.4151022lr_0.00017341600515462103seed_42optimizer_AdamWweight_decay_0.001_best_complete/RAVDESS_multimodalcnn_15_best0.pth'
+    # pretrain_state_path = '/home/ubuntu/work_space/multimodal-emotion-recognition-experiment/results/1683375767.7302299lr_0.00017341600515462103seed_42optimizer_AdamWweight_decay_0.000213835992048601/RAVDESS_multimodalcnn_15_best0.pth'
     pretrain_path = '/home/ubuntu/work_space/EfficientFace-master/checkpoint/Pretrained_EfficientFace.tar'
     model = multimodalcnn.MultiModalCNN(fusion = 'iaLSTM', pretr_ef = pretrain_path)
     pretrained_state = torch.load(pretrain_state_path)
@@ -109,6 +110,10 @@ if __name__ == '__main__':
         preds = []
         output_targets = []
         for i, (inputs_audio, inputs_visual, targets) in enumerate(test_loader):
+            if opt.data_type == 'audio':
+                inputs_visual = torch.zeros(inputs_visual.size())
+            elif opt.data_type == 'video':
+                inputs_audio = torch.zeros(inputs_audio.size())
             data_time.update(time.time() - end_time)
             inputs_visual = inputs_visual.permute(0,2,1,3,4)
             inputs_visual = inputs_visual.reshape(inputs_visual.shape[0]*inputs_visual.shape[1], inputs_visual.shape[2], inputs_visual.shape[3], inputs_visual.shape[4])
@@ -187,7 +192,8 @@ if __name__ == '__main__':
 
     print("程序运行时间为：%02d:%02d:%02d" % (hours, minutes, seconds))
 
-"""
+""" audiovedio 83.33
+Epoch: [10000][100/100] Loss 0.9320 (0.5551)    Prec@1 83.33333 (83.00000)      Prec@5 100.00000 (100.00000)
 [[32  0  0  8  0  0  0  0]
  [ 0 80  0  0  0  0  0  0]
  [ 0  0 80  0  0  0  0  0]
@@ -197,3 +203,57 @@ if __name__ == '__main__':
  [ 0  0  0  2  0  0 76  2]
  [ 0  0 27  0  0  0  0 53]]
 """
+""" audio
+Epoch: [10000][100/100] Loss 0.7765 (0.9888)    Prec@1 66.66666 (66.00000)      Prec@5 100.00000 (97.33334)
+[[32  0  0  0  0  0  8  0]
+ [ 0 70  0  4  0  0  6  0]
+ [ 6  0 32 12  8  2  0 20]
+ [12 10  2 38  0  0 16  2]
+ [ 0  0  4  2 56  0  8 10]
+ [ 0  0  6  8  2 44  6 14]
+ [ 0  2  0  0 12  0 62  4]
+ [ 0  0  0  0  8  4  6 62]]
+"""
+""" video
+Epoch: [10000][100/100] Loss 1.5327 (1.0088)    Prec@1 66.66666 (72.66667)      Prec@5 83.33333 (96.50000)
+[[28  2  0  8  2  0  0  0]
+ [ 0 61 18  0  1  0  0  0]
+ [ 0  0 80  0  0  0  0  0]
+ [ 1  6  6 65  0  2  0  0]
+ [ 4  0  4  8 39 14  7  4]
+ [ 4  0  6 11  0 48  0 11]
+ [ 0  0  0  4  0  0 74  2]
+ [ 2  2 28  0  0  7  0 41]]
+"""
+
+
+'''
+num_heads = 8
+confusion_array = np.array([[33, 5, 0, 1, 0, 0, 0, 1],
+                            [0, 80, 0, 0, 0, 0, 0, 0],
+                            [0, 6, 74, 0, 0, 0, 0, 0],
+                            [5, 6, 1, 59, 0, 0, 6, 3],
+                            [2, 0, 5, 0, 59, 6, 0, 8],
+                            [0, 0, 0, 6, 2, 52, 0, 20],
+                            [0, 2, 0, 5, 12, 0, 60, 1],
+                            [0, 0, 18, 0, 4, 8, 0, 50]])
+num_heads = 4
+confusion_array = np.array([[35, 3, 0, 0, 2, 0, 0, 0],
+                            [0, 78, 2, 0, 0, 0, 0, 0],
+                            [0, 2, 78, 0, 0, 0, 0, 0],
+                            [5, 12, 11, 42, 0, 0, 3, 7],
+                            [2, 0, 3, 0, 65, 0, 0, 10],
+                            [2, 0, 2, 0, 1, 48, 0, 27],
+                            [0, 2, 0, 0, 14, 0, 58, 6],
+                            [0, 0, 23, 0, 0, 2, 0, 55]])
+num_heads = 2
+confusion_array = np.array([[27, 6, 0, 2, 0, 0, 0, 5],
+                            [0, 80, 0, 0, 0, 0, 0, 0],
+                            [0, 2, 78, 0, 0, 0, 0, 0],
+                            [0, 8, 5, 56, 1, 2, 4, 4],
+                            [2, 0, 3, 2, 64, 4, 0, 5],
+                            [0, 0, 0, 0, 2, 58, 0, 20],
+                            [0, 2, 0, 0, 14, 0, 62, 2],
+                            [0, 0, 4, 0, 8, 4, 0, 64]])
+
+'''

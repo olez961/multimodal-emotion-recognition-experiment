@@ -45,6 +45,7 @@ def parse_opts():
     parser.add_argument('--test', action='store_true', help='If true, test is performed.')
     parser.set_defaults(test=True)
     parser.add_argument('--test_subset', default='test', type=str, help='Used subset in test (val | test)')
+    parser.add_argument('--data_type', default='audiovisual', type=str, help='Used subset in audiovisual (audio | video | audiovisual)')
     
     parser.add_argument('--n_threads', default=16, type=int, help='Number of threads for multi-thread loading')
     parser.add_argument('--video_norm_value', default=255, type=int, help='If 1, range of inputs is [0-255]. If 255, range of inputs is [0-1].')
